@@ -2,7 +2,7 @@ import { Button } from 'antd';
 
 export default function Header() {
   return (
-    <header className='sticky top-0 left-0 right-0'>
+    <header className='sticky top-0 left-0 right-0 z-50'>
       <div className="flex justify-between bg-primary2 px-8 py-4 items-center">
         <img
           src="https://www.bhdstar.vn/wp-content/uploads/2023/08/logo.png"
