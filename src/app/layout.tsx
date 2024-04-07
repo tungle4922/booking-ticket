@@ -5,6 +5,9 @@ import Header from "@/layouts/Header";
 import { NextUIProvider } from "@nextui-org/react";
 import { Providers } from "./providers";
 import Footer from "@/layouts/Footer";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false;
 
 const inter = Inter({ subsets: ["latin"] });
 
