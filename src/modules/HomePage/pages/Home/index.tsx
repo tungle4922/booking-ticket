@@ -9,28 +9,21 @@ export default function Home() {
         <div>
           <img
             className="w-full"
-            src="https://media.lottecinemavn.com/Media/WebAdmin/f0c4d329b1a544d1898558562bd6f73c.jpg"
+            src="https://cdn-test.eztek.net/Eztek/Images/de8d76e436864e92a1230171b76d7f51_638486860569905056_ORIGIN.webp"
             alt=""
           />
         </div>
         <div>
           <img
             className="w-full"
-            src="https://media.lottecinemavn.com/Media/WebAdmin/ad8a6b7932ba455cbd6c5d87b02a71a9.jpg"
+            src="https://cdn-test.eztek.net/Eztek/Images/bf503cfa01aa4c658f14e7e0e466fe33_638486858837685842_ORIGIN.webp"
             alt=""
           />
         </div>
         <div>
           <img
             className="w-full"
-            src="https://media.lottecinemavn.com/Media/WebAdmin/bf503cfa01aa4c658f14e7e0e466fe33.jpg"
-            alt=""
-          />
-        </div>
-        <div>
-          <img
-            className="w-full"
-            src="https://media.lottecinemavn.com/Media/WebAdmin/18d1440da2634f27bac6025b259575ad.jpg"
+            src="https://cdn-test.eztek.net/Eztek/Images/18d1440da2634f27bac6025b259575ad_638486859504206679_ORIGIN.webp"
             alt=""
           />
         </div>
