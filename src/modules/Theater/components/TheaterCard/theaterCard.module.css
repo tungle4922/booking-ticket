@@ -1,0 +1,43 @@
+.container{
+    flex-basis: 25%;
+    max-width: 25%;
+    padding: 0 9.8px 25px;
+}
+.btnDetail{
+    
+    background: linear-gradient(180deg, #50B648 0%, #90C63F 59.9%, #B2EC0F 99.48%);
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,.1);
+    padding: 10px 16px;
+    font-size: .8em;
+    border-radius: 6px;
+    border: 1px solid white;
+    margin-right: 8px;
+    display: inline-block;
+}
+
+.btnDetail:hover{
+    background: #72be43 !important;
+}
+
+.btnShare{
+    padding: 10px 16px;
+    font-size: .8em;
+    border: 1px solid #90C63F;
+    border-radius: 6px;
+    display: inline-block;
+    
+}
+.btnShare:hover{
+    background-color: #72be43;
+}
+
+.spanShare::before{
+    content: "";
+    display: inline-block;
+    width: 19px;
+    height: 19px;
+    background: url("https://www.bhdstar.vn/wp-content/themes/loodo-starter/inc/imgs/shareIcon.png") no-repeat;
+    background-size: contain;
+    margin-right: 4px;
+    vertical-align: middle;
+}
