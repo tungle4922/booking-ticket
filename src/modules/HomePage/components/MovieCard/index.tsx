@@ -31,7 +31,7 @@ export default function MovieCard() {
       </Link>
       <div>
         <Button type="primary" className="!bg-primary3">
-          MUA VÉ NGAY
+          <Link href={"/booking/select-date"}>Mua vé ngay</Link>
         </Button>
       </div>
     </div>

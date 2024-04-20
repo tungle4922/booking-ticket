@@ -1,0 +1,7 @@
+.screen_theater {
+    width: 700px;
+    height: 105px;
+    border: solid 5px #8AC441;
+    border-color: #8AC441 transparent transparent transparent;
+    border-radius: 50%/100px 100px 0 0;
+}
