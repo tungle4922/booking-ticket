@@ -1,8 +1,12 @@
 import React from "react";
 import { Carousel } from "antd";
 import MovieCard from "../../components/MovieCard";
+import { movieService } from "@/core/apis/movie.service";
+import { IGetAllMovieRes, TypeMovie } from "@/models/movie";
 
-export default function Home() {
+export default async function Home() {
+  const listMovie: IGetAllMovieRes[] = await movieService.getAllMovies();
+  console.log(listMovie);
   return (
     <main>
       <Carousel autoplay autoplaySpeed={3000}>
@@ -33,24 +37,28 @@ export default function Home() {
           <p className="text-center font-bold my-6 text-[20px]">
             Phim đang chiếu
           </p>
-          <div className="flex gap-7">
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
+          <div className="grid grid-cols-5 gap-7">
+            {listMovie?.map((item: any, index) => {
+              return (
+                <MovieCard key={index} data={item} type={TypeMovie.showing} />
+              );
+            })}
           </div>
         </div>
         <div>
           <p className="text-center font-bold my-6 text-[20px] mt-[100px]">
             Phim sắp chiếu
           </p>
-          <div className="flex gap-7">
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
-            <MovieCard />
+          <div className="grid grid-cols-5 gap-7">
+            {listMovie?.slice(0, 5).map((item: any, index) => {
+              return (
+                <MovieCard
+                  key={index}
+                  data={item}
+                  type={TypeMovie.commingSoon}
+                />
+              );
+            })}
           </div>
         </div>
       </div>

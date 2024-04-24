@@ -1,15 +1,21 @@
+import { IGetAllMovieRes, TypeMovie } from "@/models/movie";
 import { Button } from "antd";
 import Link from "next/link";
-import { useRouter } from "next/router";
 
-export default function MovieCard() {
+interface Props {
+  data: IGetAllMovieRes;
+  type: number;
+}
+
+export default function MovieCard(props: Props) {
+  const { data, type } = props;
   return (
     <div>
-      <Link href={"/movie-detail"}>
+      <Link href={`/movie-detail/${data._id}`}>
         <div>
           <img
             className="w-full rounded-[6px] mb-3 h-[350px] object-cover"
-            src="https://www.bhdstar.vn/wp-content/uploads/2024/03/referenceSchemeHeadOfficeallowPlaceHoldertrueheight700ldapp.jpg"
+            src={data?.image}
             alt=""
           />
           <div className="flex gap-2 my-2 items-center">
@@ -23,16 +29,21 @@ export default function MovieCard() {
               2D
             </div>
           </div>
-          <p className="uppercase font-bold mt-4 mb-3">KUNG FU PANDA 4</p>
+          <p className="uppercase font-bold mt-4 mb-3 line-clamp-1">
+            {data?.title}
+          </p>
           <p className="mb-4 text-[14px]">
-            Thể loại phim: <span className="font-medium">Drama</span>
+            Thể loại phim:{" "}
+            <span className="font-medium">{data?.genre && data.genre[0]}</span>
           </p>
         </div>
       </Link>
       <div>
-        <Button type="primary" className="!bg-primary3">
-          <Link href={"/booking/select-date"}>Mua vé ngay</Link>
-        </Button>
+        {type === TypeMovie.showing && (
+          <Button type="primary" className="!bg-primary3">
+            <Link href={"/booking/select-date"}>Mua vé ngay</Link>
+          </Button>
+        )}
       </div>
     </div>
   );
