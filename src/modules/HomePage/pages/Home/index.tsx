@@ -6,7 +6,6 @@ import { IGetAllMovieRes, TypeMovie } from "@/models/movie";
 
 export default async function Home() {
   const listMovie: IGetAllMovieRes[] = await movieService.getAllMovies();
-  console.log(listMovie);
   return (
     <main>
       <Carousel autoplay autoplaySpeed={3000}>
