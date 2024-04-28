@@ -6,8 +6,14 @@ import Link from "next/link";
 import type { FormProps } from "antd";
 import { Form } from "antd";
 import { userService } from "@/core/apis/user.service";
-import nookies from "nookies";
-import { parseCookies, setCookie, destroyCookie } from "nookies";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { setCookie } from "cookies-next";
+import { getAuthInfoSuccess } from "@/lib/slices/auth.slice";
+import { validateEmail } from "@/core/shared/validator";
+import { IState } from "@/lib/Interfaces/state";
+import { useEffect, useState } from "react";
+import { Spin } from "antd";
 
 type FieldType = {
   email?: string;
@@ -15,16 +21,35 @@ type FieldType = {
 };
 
 export default function Login() {
+  const authInfo = useSelector((state: IState) => state?.auth?.authInfo);
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (authInfo) {
+      router.push("/");
+    }
+  }, [authInfo]);
+
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
+    setIsLoading(true);
     const res = await userService.login(values);
-    console.log(res);
     if (res?.token) {
-      setCookie(null, "accessToken", res?.token, {
+      setIsLoading(false);
+      const authInfo = {
+        accessToken: res?.token,
+        userId: res?.user?._id,
+      };
+      setCookie("authInfo", authInfo, {
         maxAge: 30 * 24 * 60 * 60,
         path: "/",
       });
+      dispatch(getAuthInfoSuccess(authInfo));
       message.success("Đăng nhập thành công");
+      router.push("/");
     } else {
+      setIsLoading(false);
       message.error(res.response.data.message);
     }
   };
@@ -61,7 +86,10 @@ export default function Login() {
               <Form.Item<FieldType>
                 name="email"
                 rules={[
-                  { required: true, message: "Please input your email!" },
+                  { required: true, message: "Vui lòng nhập email" },
+                  {
+                    validator: validateEmail,
+                  },
                 ]}
               >
                 <Input className="h-10" placeholder="Nhập email" />
@@ -71,22 +99,22 @@ export default function Login() {
               <p className="ml-2 mb-2 text-white">Mật khẩu</p>
               <Form.Item<FieldType>
                 name="password"
-                rules={[
-                  { required: true, message: "Please input your password!" },
-                ]}
+                rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
               >
-                <Input.Password className="h-10" placeholder="Nhập username" />
+                <Input.Password className="h-10" placeholder="Nhập mật khẩu" />
               </Form.Item>
             </div>
             <div className="w-1/2 mx-auto mt-12 mb-6">
               <Form.Item>
-                <Button
-                  className="w-full !bg-primary3 !h-10"
-                  type="primary"
-                  htmlType="submit"
-                >
-                  Đăng nhập
-                </Button>
+                <Spin className="!ml-[52px]" size="small" spinning={isLoading}>
+                  <Button
+                    className="w-full !bg-primary3 !h-10"
+                    type="primary"
+                    htmlType="submit"
+                  >
+                    Đăng nhập
+                  </Button>
+                </Spin>
               </Form.Item>
             </div>
             <p className="text-[13px] text-center mx-2 text-white">
