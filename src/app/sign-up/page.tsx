@@ -35,7 +35,8 @@ export default function SignUp() {
   const onFinish: FormProps<FieldType>["onFinish"] = async (values) => {
     setIsLoading(true);
     const res = await userService.register(values);
-    if (res?.response?.status === 200) {
+    console.log(res)
+    if (res?.user) {
       setIsLoading(false);
       message.success("Đăng ký thành công");
       router.push("/login");

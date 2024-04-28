@@ -92,7 +92,7 @@ export default function Header() {
                 </Space>
               </a>
             </Dropdown>
-            <span className="ml-2 line-clamp-1">{userInfo?.fullName}</span>
+            <span className="ml-2 line-clamp-1">{userInfo?.username}</span>
           </div>
         ) : (
           <div className="flex">
