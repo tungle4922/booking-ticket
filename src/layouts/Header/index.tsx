@@ -11,7 +11,6 @@ import {
   getUserInfoSuccess,
 } from "@/lib/slices/auth.slice";
 import { userService } from "@/core/apis/user.service";
-import { SmileOutlined } from "@ant-design/icons";
 import type { MenuProps } from "antd";
 import { Dropdown, Space } from "antd";
 

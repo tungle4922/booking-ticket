@@ -41,7 +41,7 @@ export default function MovieCard(props: Props) {
       <div>
         {type === TypeMovie.showing && (
           <Button type="primary" className="!bg-primary3">
-            <Link href={"/booking/select-date"}>Mua vé ngay</Link>
+            <Link href={`/booking/select-date?movieId=${data?._id}`}>Mua vé ngay</Link>
           </Button>
         )}
       </div>

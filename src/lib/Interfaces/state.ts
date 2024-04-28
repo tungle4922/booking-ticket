@@ -1,3 +1,6 @@
+import { IBookingMainParams } from "@/models/booking";
+import { IGetAllMovieRes } from "@/models/movie";
+
 export interface IState {
   auth: {
     authInfo: {
@@ -5,6 +8,10 @@ export interface IState {
       userId: string;
     };
     userInfo: IUserInfo;
+  };
+  movies: {
+    movieDetail: IGetAllMovieRes;
+    bookingParams: IBookingMainParams;
   };
 }
 

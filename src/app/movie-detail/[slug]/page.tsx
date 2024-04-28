@@ -88,7 +88,7 @@ export default async function MovieDetail(params: IParams) {
           </p>
           <div className="mt-8 flex gap-6">
             <Button className="!border-[2px] !border-primary3 !bg-primary3 !text-white !pb-9 !text-[18px] !px-12">
-              <Link href={"/booking/select-date"}>Mua vé ngay</Link>
+              <Link href={`/booking/select-date?movieId=${movieDetail?._id}`}>Mua vé ngay</Link>
             </Button>
             <Button className="!border-[2px] !border-white !text-white !bg-primary1 !pb-9 !text-[18px] !px-12">
               Xem Trailer
