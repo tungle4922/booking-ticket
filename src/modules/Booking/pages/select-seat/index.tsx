@@ -1,8 +1,16 @@
+"use client";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import styles from "../../../../styles/select-page.module.css";
 import { faBackwardStep, faCouch } from "@fortawesome/free-solid-svg-icons";
 import { Button } from "antd";
 import CheckOutBox from "../../components/checkout-box";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { IState } from "@/lib/Interfaces/state";
+import { getBookingParamsSuccess } from "@/lib/slices/movies.slice";
+import { useEffect, useState } from "react";
+import { bookingService } from "@/core/apis/booking.service";
 
 interface ISeat {
   type: number;
@@ -26,6 +34,15 @@ enum SeatColor {
 }
 
 export default function SelectSeat() {
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const authInfo = useSelector((state: IState) => state?.auth?.authInfo);
+  const movieDetail = useSelector(
+    (state: IState) => state?.movies?.movieDetail
+  );
+  const bookingParams = useSelector(
+    (state: IState) => state?.movies?.bookingParams
+  );
   const listSeat: ISeat[] = [
     {
       type: SeatType.normal,
@@ -136,7 +153,7 @@ export default function SelectSeat() {
       code: "C3",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "C4",
     },
     {
@@ -148,7 +165,7 @@ export default function SelectSeat() {
       code: "C6",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "C7",
     },
     {
@@ -184,7 +201,7 @@ export default function SelectSeat() {
       code: "D3",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "D4",
     },
     {
@@ -196,7 +213,7 @@ export default function SelectSeat() {
       code: "D6",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "D7",
     },
     {
@@ -232,7 +249,7 @@ export default function SelectSeat() {
       code: "E3",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "E4",
     },
     {
@@ -244,7 +261,7 @@ export default function SelectSeat() {
       code: "E6",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "E7",
     },
     {
@@ -280,7 +297,7 @@ export default function SelectSeat() {
       code: "F3",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "F4",
     },
     {
@@ -292,7 +309,7 @@ export default function SelectSeat() {
       code: "F6",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "F7",
     },
     {
@@ -328,7 +345,7 @@ export default function SelectSeat() {
       code: "G3",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "G4",
     },
     {
@@ -340,7 +357,7 @@ export default function SelectSeat() {
       code: "G6",
     },
     {
-      type: SeatType.sold,
+      type: SeatType.vip,
       code: "G7",
     },
     {
@@ -412,6 +429,9 @@ export default function SelectSeat() {
       code: "H12",
     },
   ];
+  const listSeatArr = useSelector(
+    (state: IState) => state?.movies?.bookingParams?.listAllSeat
+  );
 
   const seatDes = [
     {
@@ -435,6 +455,77 @@ export default function SelectSeat() {
       type: SeatType.sold,
     },
   ];
+
+  useEffect(() => {
+    initListSeat();
+  }, []);
+
+  const initListSeat = async () => {
+    const theaterId = await bookingService.getTheaterIdByName(
+      bookingParams?.cinemaLocation
+    );
+    const listSeatSold = await bookingService.getSeatSold(
+      movieDetail?._id!,
+      bookingParams?.time,
+      theaterId
+    );
+    console.log(listSeatSold)
+    const updatedBookingParams = { ...bookingParams };
+    const updatedSeatArr = listSeat?.map((item: any) => {
+      if (listSeatSold?.includes(item.code)) {
+        return { ...item, type: SeatType.sold };
+      } else {
+        return item;
+      }
+    });
+    updatedBookingParams.listAllSeat = updatedSeatArr;
+    updatedBookingParams.theaterId = theaterId;
+    dispatch(getBookingParamsSuccess(updatedBookingParams));
+  };
+
+  const selectSeat = (seat: string, type: number) => {
+    if (type === SeatType.sold) {
+      return;
+    }
+    if (type !== SeatType.selected) {
+      const updatedBookingParams = { ...bookingParams };
+      const totalPrice = updatedBookingParams.price;
+      const seatArr = updatedBookingParams?.seatArr;
+      const newSeatArr = [...seatArr, seat];
+      const updatedSeatArr = listSeatArr?.map((item: any) => {
+        if (newSeatArr?.includes(item.code)) {
+          return { ...item, type: SeatType.selected };
+        } else {
+          return item;
+        }
+      });
+      updatedBookingParams.seatArr = newSeatArr;
+      updatedBookingParams.listAllSeat = updatedSeatArr;
+      updatedBookingParams.price = totalPrice + movieDetail?.ticketPrice!;
+      dispatch(getBookingParamsSuccess(updatedBookingParams));
+    } else {
+      const updatedBookingParams = { ...bookingParams };
+      const totalPrice = updatedBookingParams.price;
+      const seatArr = updatedBookingParams?.seatArr;
+      const newSeatArr = seatArr.filter((item) => item !== seat);
+      const updatedSeatArr = listSeatArr?.map((item: any, index: number) => {
+        if (item.code === seat && index >= 0 && index <= 23) {
+          return { ...item, type: SeatType.normal };
+        } else if (item.code === seat && index >= 24 && index <= 83) {
+          return { ...item, type: SeatType.vip };
+        } else if (item.code === seat && index >= 84 && index <= 95) {
+          return { ...item, type: SeatType.couple };
+        } else {
+          return item;
+        }
+      });
+      updatedBookingParams.seatArr = newSeatArr;
+      updatedBookingParams.listAllSeat = updatedSeatArr;
+      updatedBookingParams.price = totalPrice - movieDetail?.ticketPrice!;
+      dispatch(getBookingParamsSuccess(updatedBookingParams));
+    }
+  };
+
   return (
     <section className="py-12 px-32">
       <p className="text-center font-bold text-[25px] mb-12">
@@ -449,9 +540,13 @@ export default function SelectSeat() {
             Màn hình
           </p>
           <div className="grid grid-cols-12 w-[550px] mx-auto pl-5 mt-[70px] gap-y-4">
-            {listSeat.map((item, index) => {
+            {listSeatArr?.map((item: any, index: any) => {
               return (
-                <div key={index} className="relative cursor-pointer">
+                <div
+                  key={index}
+                  className="relative cursor-pointer"
+                  onClick={() => selectSeat(item.code, item.type)}
+                >
                   <FontAwesomeIcon
                     fontSize={28}
                     color={SeatColor[item.type]}
