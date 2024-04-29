@@ -5,7 +5,7 @@ import { IState } from "@/lib/Interfaces/state";
 import { getBookingParamsSuccess } from "@/lib/slices/movies.slice";
 import { IBookingReq, IUpdateSeatReq } from "@/models/booking";
 import { Button, message } from "antd";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Spin } from "antd";
@@ -14,6 +14,7 @@ export default function CheckOutBox() {
   const router = useRouter();
   const dispatch = useDispatch();
   const authInfo = useSelector((state: IState) => state?.auth?.authInfo);
+  const pathname = usePathname();
   const bookingParams = useSelector(
     (state: IState) => state?.movies?.bookingParams
   );
@@ -36,10 +37,8 @@ export default function CheckOutBox() {
   }, [bookingParams]);
 
   useEffect(() => {
-    if (window.location.pathname) {
-      setPath(window.location.pathname);
-    }
-  }, [window.location.pathname]);
+    setPath(pathname);
+  }, [pathname]);
 
   const getDate: (ISODate: string) => string = (ISODate) => {
     const date = ISODate?.split("T");
@@ -128,12 +127,16 @@ export default function CheckOutBox() {
             return <span key={index}>{seat} </span>;
           })}
         </div>
-        <p className="w-1/3 line-clamp-1 text-right">{bookingParams?.price?.toLocaleString()} VND</p>
+        <p className="w-1/3 line-clamp-1 text-right">
+          {bookingParams?.price?.toLocaleString()} VND
+        </p>
       </div>
       <div className="h-[1px] bg-[#ccc] mx-[-24px] my-4"></div>
       <div className="my-7 flex justify-between">
         <p>Tổng tiền</p>
-        <p className="font-semibold text-lg">{bookingParams?.price.toLocaleString()} VND</p>
+        <p className="font-semibold text-lg">
+          {bookingParams?.price.toLocaleString()} VND
+        </p>
       </div>
       {path === "/booking/select-seat" && (
         <Button
