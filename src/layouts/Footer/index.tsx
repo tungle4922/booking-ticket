@@ -23,10 +23,9 @@ export default function Footer() {
         <p className="mb-2">Email hỗ trợ: cskh@bhdstar.vn</p>
         <p className="mb-2">MẠNG XÃ HỘI</p>
         <div className="flex items-center"> 
-            <img className="w-14 h-14" src="https://static.vecteezy.com/system/resources/previews/018/930/476/original/facebook-logo-facebook-icon-transparent-free-png.png" alt="" />
-            <img className="w-14 h-14" src="https://static.vecteezy.com/system/resources/previews/018/930/476/original/facebook-logo-facebook-icon-transparent-free-png.png" alt="" />
-            <img className="w-14 h-14" src="https://static.vecteezy.com/system/resources/previews/018/930/476/original/facebook-logo-facebook-icon-transparent-free-png.png" alt="" />
-            <img className="w-14 h-14" src="https://static.vecteezy.com/system/resources/previews/018/930/476/original/facebook-logo-facebook-icon-transparent-free-png.png" alt="" />
+            <img className="w-8 h-8 rounded-full mx-1" src="https://cdn.tgdd.vn/2020/03/GameApp/Facebook-200x200.jpg" alt="" />
+            <img className="w-8 h-8 rounded-full mx-1" src="https://cdn.tgdd.vn/2020/03/GameApp/Instagram-200x200.jpg" alt="" />
+            <img className="w-8 h-8 rounded-full mx-1" src="https://stc-zaloprofile.zdn.vn/pc/v1/images/zalo_sharelogo.png" alt="" />
         </div>
       </div>
     </footer>
