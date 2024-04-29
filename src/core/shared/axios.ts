@@ -4,7 +4,7 @@ import { getCookie } from "cookies-next";
 const cancelTokenSource = axios.CancelToken.source();
 
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: process.env.API_URL || "http://localhost:8080",
+  baseURL: process.env.API_URL || "http://103.95.197.219:3005",
   timeout: 10000,
   headers: {
     Accept: "application/json",
