@@ -13,11 +13,13 @@ import {
 import { userService } from "@/core/apis/user.service";
 import type { MenuProps } from "antd";
 import { Dropdown, Space } from "antd";
+import { useRouter } from "next/navigation";
 
 export default function Header() {
   const authInfo = useSelector((state: IState) => state?.auth?.authInfo);
   const userInfo = useSelector((state: IState) => state?.auth?.userInfo);
   const dispatch = useDispatch();
+  const router = useRouter();
 
   useEffect(() => {
     const authInfoCookie = getCookie("authInfo")
@@ -48,9 +50,17 @@ export default function Header() {
       key: "1",
       label: (
         <p
-          onClick={logOut}
+          onClick={() => router.push("/account")}
           className="py-1 px-4 cursor-pointer font-medium"
         >
+          Tài khoản
+        </p>
+      ),
+    },
+    {
+      key: "2",
+      label: (
+        <p onClick={logOut} className="py-1 px-4 cursor-pointer font-medium">
           Đăng xuất
         </p>
       ),
@@ -62,9 +72,9 @@ export default function Header() {
       <div className="flex justify-between bg-primary2 px-8 py-4 items-center">
         <Link href={"/"}>
           <img
-            src="https://www.bhdstar.vn/wp-content/uploads/2023/08/logo.png"
+            src="https://cdn-test.eztek.net/Eztek/tanvietbook/logo_638499920899412887_ORIGIN.webp"
             alt=""
-            className="w-[45px] h-[45px] cursor-pointer"
+            className="w-[45px] h-[45px] cursor-pointer rounded-full"
           />
         </Link>
         <div className="flex">
