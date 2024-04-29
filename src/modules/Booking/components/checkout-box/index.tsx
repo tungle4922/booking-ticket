@@ -6,7 +6,9 @@ import { getBookingParamsSuccess } from "@/lib/slices/movies.slice";
 import { IBookingReq, IUpdateSeatReq } from "@/models/booking";
 import { Button, message } from "antd";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Spin } from "antd";
 
 export default function CheckOutBox() {
   const router = useRouter();
@@ -18,33 +20,58 @@ export default function CheckOutBox() {
   const movieDetail = useSelector(
     (state: IState) => state?.movies?.movieDetail
   );
+  const [path, setPath] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!authInfo) {
+      router.push("/login");
+    }
+  }, [authInfo]);
+
+  useEffect(() => {
+    if (!bookingParams) {
+      router.push("/");
+    }
+  }, [bookingParams]);
+
+  useEffect(() => {
+    if (window.location.pathname) {
+      setPath(window.location.pathname);
+    }
+  }, [window.location.pathname]);
 
   const getDate: (ISODate: string) => string = (ISODate) => {
-    const date = ISODate.split("T");
+    const date = ISODate?.split("T");
+    if (!date) return "";
     return date[0];
   };
 
   const getTime: (ISODate: string) => string = (ISODate) => {
-    const time = ISODate.split("T")[1];
-    const hour = time.split(":")[0];
-    const minute = time.split(":")[1];
+    const time = ISODate?.split("T")[1];
+    const hour = time?.split(":")[0];
+    const minute = time?.split(":")[1];
     const result = hour + ":" + minute;
     return result;
   };
 
   const checkOut = async () => {
+    setIsLoading(true);
     const res1 = await updateSeat();
     if (res1 === 0) {
       message.error("Có lỗi xảy ra");
+      setIsLoading(false);
       return;
     }
     const res2 = await bookingTicket();
     if (res2 === 0) {
       message.error("Có lỗi xảy ra");
+      setIsLoading(false);
       return;
     }
+    setIsLoading(false);
     message.success("Đặt vé thành công");
-    router.push("/");
+    router.push("/booking/view-ticket");
   };
 
   const updateSeat = async () => {
@@ -94,23 +121,40 @@ export default function CheckOutBox() {
           2D
         </div>
       </div>
-      <div className="flex items-center justify-between my-5">
-        <div>
-          <p>2 x Adult-VIP-2D-HL</p>
+      <div className="flex items-center justify-between my-5 gap-4">
+        <div className="w-2/3">
+          <p>{bookingParams?.seatArr?.length} x Adult-2D-HL</p>
           {bookingParams?.seatArr?.map((seat, index) => {
             return <span key={index}>{seat} </span>;
           })}
         </div>
-        <p>{bookingParams?.price?.toLocaleString()} VND</p>
+        <p className="w-1/3 line-clamp-1 text-right">{bookingParams?.price?.toLocaleString()} VND</p>
       </div>
       <div className="h-[1px] bg-[#ccc] mx-[-24px] my-4"></div>
       <div className="my-7 flex justify-between">
         <p>Tổng tiền</p>
-        <p className="font-semibold text-lg">{bookingParams?.price} VND</p>
+        <p className="font-semibold text-lg">{bookingParams?.price.toLocaleString()} VND</p>
       </div>
-      <Button onClick={checkOut} className="!bg-primary3 w-full" type="primary">
-        THANH TOÁN
-      </Button>
+      {path === "/booking/select-seat" && (
+        <Button
+          onClick={() => router.push("/booking/check-out")}
+          className="!bg-primary3 w-full"
+          type="primary"
+        >
+          TIẾP TỤC
+        </Button>
+      )}
+      {path === "/booking/check-out" && (
+        <Spin className="!ml-[52px]" size="small" spinning={isLoading}>
+          <Button
+            onClick={checkOut}
+            className="!bg-primary3 w-full"
+            type="primary"
+          >
+            THANH TOÁN
+          </Button>
+        </Spin>
+      )}
       <p
         className="text-center text-[13px] my-4 cursor-pointer"
         onClick={() =>

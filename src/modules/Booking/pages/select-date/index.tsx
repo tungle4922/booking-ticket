@@ -75,6 +75,12 @@ export default function SelectDate() {
   ];
 
   useEffect(() => {
+    if (!authInfo) {
+      router.push("/login");
+    }
+  }, [authInfo]);
+
+  useEffect(() => {
     getMovieDetail();
   }, [movieId]);
 
@@ -104,7 +110,9 @@ export default function SelectDate() {
       price: 0,
       cinemaLocation: theater,
       status: "Confirmed",
-      listAllSeat: []
+      listAllSeat: [],
+      theaterId: "",
+      paymentMethod: "",
     };
     dispatch(getBookingParamsSuccess(bookingParam));
     router.push("/booking/select-seat");

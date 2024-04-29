@@ -12,6 +12,7 @@ export interface IBookingMainParams {
   status: string;
   listAllSeat: any;
   theaterId: string;
+  paymentMethod: string;
 }
 
 export interface IBookingReq {

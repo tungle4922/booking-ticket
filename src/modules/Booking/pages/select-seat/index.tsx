@@ -452,7 +452,7 @@ export default function SelectSeat() {
     },
     {
       name: "Ghế đã bán",
-      type: SeatType.vip,
+      type: SeatType.sold,
     },
   ];
 
