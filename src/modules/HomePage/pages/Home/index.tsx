@@ -37,7 +37,7 @@ export default async function Home() {
             Phim đang chiếu
           </p>
           <div className="grid grid-cols-5 gap-7">
-            {listMovie?.map((item: any, index) => {
+            {listMovie?.slice(5).map((item: any, index) => {
               return (
                 <MovieCard key={index} data={item} type={TypeMovie.showing} />
               );
