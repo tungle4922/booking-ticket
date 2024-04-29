@@ -1,44 +1,113 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import Cookies from 'js-cookie';
+'use client'
+import { FormEvent, useEffect, useState } from "react";
+import Cookies from "js-cookie";
+import { User } from "@nextui-org/react";
+import { toast } from "sonner";
 
-const AccountPage = () => {
-  const [userData, setUserData] = useState(null);
+type User = {
+  username: string;
+  email: string;
+  fullName: string;
+  dateOfBirth: string;
+  gender: string;
+  password: string;
+  phoneNumber: string;
+  address: string;
+  bookings:string[]
+};
+
+type obj = {
+  user: User
+}
+type Ticket = {
+  _id: string;
+  movieName: string;
+  seatNumbers: string[];
+  ticketType: string;
+  price: number;
+  bookingDate: string;
+  cinemaLocation: string;
+  voucherId: string;
+  status: string;
+};
+
+
+const AccountPage: React.FC = () => {
+  const [userData, setUserData] = useState<User | null>(null);
+  const [ticketData, setTicketData] = useState<Ticket[] | null>(null);
+
+  const getToken = () => {
+    const cookieValue: any = Cookies.get("authInfo");
+    const cookie = JSON.parse(cookieValue);
+    return cookie.accessToken;
+  }
+
+  const submitForm = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const token = getToken();
+    const authInfoCookie: any = Cookies.get("authInfo");
+    const authInfo = JSON.parse(authInfoCookie);
+    const userId = authInfo.userId;
+
+    const response = await fetch(`http://localhost:8080/user/${userId}`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        username: userData?.username,
+        email: userData?.email,
+        fullName: userData?.fullName,
+        dateOfBirth: userData?.dateOfBirth,
+        gender: userData?.gender,
+        phoneNumber: userData?.phoneNumber,
+        address: userData?.address,
+        password: userData?.password,
+      }),
+    });
+    const data = await response.json();
+    toast.success("Đổi thông tin thành công");
+    setTimeout(() => {
+      window.location.reload(); 
+    }, 2000); 
+  }
 
   useEffect(() => {
-    const userDataFromCookie = Cookies.get("authInfo");
-    if (userDataFromCookie) {
-      const parsedUserData = JSON.parse(userDataFromCookie);
-      setUserData(parsedUserData);
-    }
+    const fetchUserData = async () => {
+      try {
+        const authInfoCookie = Cookies.get("authInfo");
+
+        if (authInfoCookie) {
+          const authInfo = JSON.parse(authInfoCookie);
+          const userId = authInfo.userId;
+
+          const response = await fetch(`http://localhost:8080/user/${userId}`);
+          const data: obj = await response.json(); // Type the fetched data as obj
+          const dataU: User = data.user;
+          const bookingIds: string[] = dataU.bookings;
+
+          // Fetch ticket data concurrently using Promise.all
+          const ticketPromises = bookingIds.map((bookingId) =>
+            fetch(`http://localhost:8080/booking/${bookingId}`)
+              .then((res) => res.json())
+              .then((ticket) => ticket.booking)
+          );
+
+          const tickets = await Promise.all(ticketPromises);
+          setUserData(dataU);
+          setTicketData(tickets);
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
   }, []);
 
-  if (!userData) {
-    return <div>Loading...</div>;
-  }
-  const days = [];
-  const months = [];
-  const years = [];
-  for (let i = 1; i <= 31; i++) {
-    days.push(
-      <option key={i} value={i} className="bg-[black]">
-        {i}
-      </option>
-    );
-  }
-  for (let i = 1; i <= 12; i++) {
-    months.push(
-      <option key={i} value={i} className="bg-[black]">
-        {i}
-      </option>
-    );
-  }
-  for (let i = 1930; i <= 2024; i++) {
-    years.push(
-      <option key={i} value={i} className="bg-[black]">
-        {i}
-      </option>
-    );
+  if (!userData||!ticketData) {
+    return <div className="h-[400px] flex justify-center items-center text-2xl font-bold">Loading...</div>;
   }
 
   return (
@@ -55,7 +124,7 @@ const AccountPage = () => {
               />
               <div>
                 <h2 className="pb-[10px] text-lg font-bold text-[#72be43]">
-                  Trọng Hiệp Nguyễn
+                  {userData.fullName}
                 </h2>
                 <ul className="pb-[8px]">
                   <li className="inline mr-5">
@@ -75,7 +144,7 @@ const AccountPage = () => {
                 </ul>
                 <ul className="pb-[8px]">
                   <li className="inline mr-5">
-                    Tổng chi tiêu trong tháng (4/2024):{" "}
+                    Tổng chi tiêu trong tháng:{" "}
                     <span className="text-[#72be43]">0 VND</span>
                   </li>
                 </ul>
@@ -86,153 +155,122 @@ const AccountPage = () => {
               </div>
             </div>
             <hr className="border-dashed my-[30px] border-[#454D6A] opacity-100 border-t" />
-            <div className="flex flex-wrap gap-y-4 justify-center">
-              <div className="w-1/2 pr-[10px]">
-                <label htmlFor="last_name" className="block pb-[10px]">
-                  Họ <span>*</span>
-                </label>
-                <input
-                  type="text"
-                  id="last_name"
-                  className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
-                />
-              </div>
-              <div className="w-1/2 pl-[10px]">
-                <label htmlFor="first_name" className="block pb-[10px]">
-                  Tên đệm và tên <span>*</span>
-                </label>
-                <input
-                  type="text"
-                  id="first_name"
-                  className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
-                />
-              </div>
-              <div className="w-full ">
-                <label htmlFor="email" className="block pb-[10px]">
-                  Email <span>*</span>
-                </label>
-                <input
-                  type="text"
-                  id="email"
-                  className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
-                />
-              </div>
-              <div className="w-2/3 pr-[10px]">
-                <label htmlFor="pass" className="block pb-[10px]">
-                  Mật khẩu <span>*</span>
-                </label>
-                <input
-                  type="password"
-                  id="pass"
-                  className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
-                />
-              </div>
-              <div className="w-1/3 pl-[10px]">
-                <label htmlFor="" className="block pb-[10px]">
-                  &nbsp;
-                </label>
-                <a
-                  href=""
-                  className="block max-w-full bg-[#72be43] text-center rounded h-[38px] leading-[38px] text-base font-bold"
-                >
-                  ĐỔI MẬT KHẨU
-                </a>
-              </div>
-              <div className="w-full ">
-                <label htmlFor="phone" className="block pb-[10px]">
-                  Số điện thoại <span>*</span>
-                </label>
-                <input
-                  type="text"
-                  id="phone"
-                  readOnly
-                  disabled
-                  value={"0976071573"}
-                  className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
-                />
-              </div>
-              <div className="w-full ">
-                <label htmlFor="sex" className="block pb-[10px]">
-                  Giới tính <span>*</span>
-                </label>
-                <div className="flex items-center justify-center relative min-w-full h-[38px]">
-                  <select
-                    id="sex"
-                    name="sex"
-                    className="bg-transparent border border-[#454d6a]  px-3 w-full h-full appearance-none"
-                  >
-                    <option className="bg-[black]" value="male">
-                      Nam
-                    </option>
-                    <option className="bg-[black]" value="female">
-                      Nữ
-                    </option>
-                    <option className="bg-[black]" value="other">
-                      Khác
-                    </option>
-                  </select>
-                  <img
-                    src="https://bhdstar.vn/wp-content/themes/loodo-starter/inc/imgs/chevron-down.png"
-                    className="absolute right-1 pointer-events-none"
-                    alt=""
+            <div>
+              <form
+                className="flex flex-wrap gap-y-4 justify-center"
+                onSubmit={(e) => submitForm(e)}
+              >
+                <div className="w-full">
+                  <label htmlFor="fullName" className="block pb-[10px]">
+                    Họ tên<span>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="fullName"
+                    className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
+                    value={userData.fullName}
+                    readOnly
+                    onChange={(events) =>
+                      setUserData({
+                        ...userData,
+                        [events.target.name]: events.target.value,
+                      })
+                    }
                   />
                 </div>
-              </div>
-              <div className="w-full">
-                <label className="block pb-[10px]" htmlFor="">
-                  Ngày sinh *
-                </label>
-                <div className="w-full flex gap-3">
-                  <div className="flex items-center justify-center relative w-1/3 h-[38px] pr-[10px]">
+                <div className="w-full ">
+                  <label htmlFor="email" className="block pb-[10px]">
+                    Email <span>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="email"
+                    className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
+                    value={userData.email}
+                    onChange={(events) =>
+                      setUserData({
+                        ...userData,
+                        [events.target.name]: events.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="w-full">
+                  <label htmlFor="pass" className="block pb-[10px]">
+                    Mật khẩu <span>*</span>
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
+                    value={userData.password}
+                    onChange={(events) =>
+                      setUserData({
+                        ...userData,
+                        [events.target.name]: events.target.value,
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="w-full ">
+                  <label htmlFor="phone" className="block pb-[10px]">
+                    Số điện thoại <span>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="phoneNumber"
+                    value={userData.phoneNumber}
+                    className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
+                    onChange={(events) =>
+                      setUserData({
+                        ...userData,
+                        [events.target.name]: events.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div className="w-full ">
+                  <label htmlFor="gender" className="block pb-[10px]">
+                    Giới tính <span>*</span>
+                  </label>
+                  <div className="flex items-center justify-center relative min-w-full h-[38px]">
                     <select
-                      id="day"
-                      name="day"
+                      id="gender"
+                      name="gender"
                       className="bg-transparent border border-[#454d6a]  px-3 w-full h-full appearance-none"
+                      value={userData.gender}
+                      onChange={(e) => {
+                        setUserData({
+                          ...userData,
+                          [e.target.name]: e.target.value,
+                        });
+                      }}
                     >
-                      {days}
+                      <option className="bg-[black]" value="male">
+                        Nam
+                      </option>
+                      <option className="bg-[black]" value="female">
+                        Nữ
+                      </option>
+                      <option className="bg-[black]" value="other">
+                        Khác
+                      </option>
                     </select>
                     <img
                       src="https://bhdstar.vn/wp-content/themes/loodo-starter/inc/imgs/chevron-down.png"
-                      className="absolute right-3 pointer-events-none"
-                      alt=""
-                    />
-                  </div>
-                  <div className="flex items-center justify-center relative w-1/3 h-[38px] pr-[10px]">
-                    <select
-                      id="month"
-                      name="month"
-                      className="bg-transparent border border-[#454d6a]  px-3 w-full h-full appearance-none"
-                    >
-                      {months}
-                    </select>
-                    <img
-                      src="https://bhdstar.vn/wp-content/themes/loodo-starter/inc/imgs/chevron-down.png"
-                      className="absolute right-3 pointer-events-none"
-                      alt=""
-                    />
-                  </div>
-                  <div className="flex items-center justify-center relative w-1/3 h-[38px] pr-[10px]">
-                    <select
-                      id="year"
-                      name="year"
-                      className="bg-transparent border border-[#454d6a]  px-3 w-full h-full appearance-none"
-                    >
-                      {years}
-                    </select>
-                    <img
-                      src="https://bhdstar.vn/wp-content/themes/loodo-starter/inc/imgs/chevron-down.png"
-                      className="absolute right-3 pointer-events-none"
+                      className="absolute right-1 pointer-events-none"
                       alt=""
                     />
                   </div>
                 </div>
-              </div>
-              <a
-                href=""
-                className="block w-1/3 bg-[#72be43] text-center rounded h-[38px] leading-[38px] text-base font-bold"
-              >
-                CẬP NHẬT
-              </a>
+                <button
+                  type="submit"
+                  className="block w-1/3 bg-[#72be43] text-center rounded h-[38px] leading-[38px] text-base font-bold"
+                >
+                  CẬP NHẬT
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -247,7 +285,7 @@ const AccountPage = () => {
               <ul className="pl-[16px] text-[#ccc]">
                 <li className="pb-2">
                   Tên đăng nhập:
-                  <span className="text-white"> hiepyolo02@gmail.com</span>
+                  <span className="text-white"> {userData.username}</span>
                 </li>
                 <li className="pb-2">
                   Số thẻ: <span className="text-white">ONLA1068087</span>
@@ -281,9 +319,9 @@ const AccountPage = () => {
             <tr>
               <th
                 scope="col"
-                className="h-12 px-6 text-sm font-medium  border-l first:border-l-0 text-white-700 bg-[#272b3d]"
+                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
               >
-                STT
+                Phim
               </th>
               <th
                 scope="col"
@@ -291,6 +329,7 @@ const AccountPage = () => {
               >
                 Thời gian giao dịch
               </th>
+
               <th
                 scope="col"
                 className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
@@ -307,33 +346,37 @@ const AccountPage = () => {
                 scope="col"
                 className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
               >
-                Tổng tiền
+                Số ghế
               </th>
-            </tr>
-            <tr>
               <th
                 scope="col"
-                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent"
-              ></th>
-              <th
-                scope="col"
-                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent"
-              ></th>
-              <th
-                scope="col"
-                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent"
-              ></th>
-              <th
-                scope="col"
-                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent"
-              ></th>
-              <th
-                scope="col"
-                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent"
+                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
               >
                 Tổng tiền
               </th>
             </tr>
+            {ticketData.map((ticket) => (
+              <tr>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {ticket.movieName}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {ticket.bookingDate}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {ticket._id}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {ticket.cinemaLocation}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {ticket.seatNumbers}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {ticket.price}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
