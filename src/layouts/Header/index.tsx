@@ -78,14 +78,16 @@ export default function Header() {
           />
         </Link>
         <div className="flex">
-          <p className="text-white mr-4">Lịch chiếu</p>
+          <Link href={"/search-movie"}>
+            <p className="text-white mr-4">Tất cả phim</p>
+          </Link>
           <Link href={"/theater"}>
             <p className="text-white mr-4">Hệ thống rạp</p>
           </Link>
           <Link href={"/discount"}>
             <p className="text-white mr-4">Khuyến mãi/Sự kiện</p>
           </Link>
-          <p className="text-white mr-4">Cửa hàng</p>
+          <p className="text-white mr-4">Lịch chiếu</p>
         </div>
         {authInfo ? (
           <div className="flex items-center">
