@@ -42,7 +42,7 @@ function convertToReadableName(input: string): string {
 async function getData(name: string) {
   const par = convertToReadableName(name);
   const res = await fetch(
-    `http://localhost:8080/theater/findTheaterByName?name=${par}`
+    `http://103.95.197.219:3005/theater/findTheaterByName?name=${par}`
   );
 
   if (!res.ok) {
@@ -53,7 +53,7 @@ async function getData(name: string) {
 }
 
 async function getDatas() {
-  const res = await fetch(`http://localhost:8080/theater/getAllTheater`);
+  const res = await fetch(`http://103.95.197.219:3005/theater/getAllTheater`);
 
   if (!res.ok) {
     throw new Error("Failed to fetch data");

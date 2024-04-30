@@ -49,7 +49,7 @@ const AccountPage: React.FC = () => {
     const authInfo = JSON.parse(authInfoCookie);
     const userId = authInfo.userId;
 
-    const response = await fetch(`http://localhost:8080/user/${userId}`, {
+    const response = await fetch(`http://103.95.197.219:3005/user/${userId}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -82,14 +82,14 @@ const AccountPage: React.FC = () => {
           const authInfo = JSON.parse(authInfoCookie);
           const userId = authInfo.userId;
 
-          const response = await fetch(`http://localhost:8080/user/${userId}`);
+          const response = await fetch(`http://103.95.197.219:3005/user/${userId}`);
           const data: obj = await response.json(); // Type the fetched data as obj
           const dataU: User = data.user;
           const bookingIds: string[] = dataU.bookings;
 
           // Fetch ticket data concurrently using Promise.all
           const ticketPromises = bookingIds.map((bookingId) =>
-            fetch(`http://localhost:8080/booking/${bookingId}`)
+            fetch(`http://103.95.197.219:3005/booking/${bookingId}`)
               .then((res) => res.json())
               .then((ticket) => ticket.booking)
           );
@@ -355,8 +355,8 @@ const AccountPage: React.FC = () => {
                 Tổng tiền
               </th>
             </tr>
-            {ticketData.map((ticket) => (
-              <tr>
+            {ticketData?.map((ticket) => (
+              <tr key={ticket._id}>
                 <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
                   {ticket.movieName}
                 </td>
