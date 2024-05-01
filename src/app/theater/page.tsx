@@ -17,7 +17,6 @@ async function getData() {
 const  TheaterHome = async() => { 
   const data: Object = await getData()
   const theaters: Theater[] = data.theaters
-  console.log(theaters)
   
   return (
     <div>
