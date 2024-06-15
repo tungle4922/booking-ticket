@@ -10,7 +10,7 @@ interface Object {
 }
 
 async function getData() {
-  const res = await fetch("http://103.95.197.219:3005/theater/getAllTheater");
+  const res = await fetch("http://localhost:8080/theater/getAllTheater");
   return res.json()
 }
 
