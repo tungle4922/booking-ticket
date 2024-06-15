@@ -63,11 +63,8 @@ async function getDatas() {
 }
 
 const TheaterDetail = async ({ params }: { params: { theaterName: string } }) => {
-  console.log(params.theaterName)
   const theater: Theater = await getData(params.theaterName);
-  console.log(theater)
   const datas: Object = await getDatas();
-  console.log(datas)
   const theaters: Theater[] = datas.theaters;
 
   // const theater: Theater = {
