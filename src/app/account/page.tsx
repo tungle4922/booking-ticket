@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import { FormEvent, useEffect, useState } from "react";
 import Cookies from "js-cookie";
 import { User } from "@nextui-org/react";
@@ -13,12 +13,24 @@ type User = {
   password: string;
   phoneNumber: string;
   address: string;
-  bookings:string[]
+  bookings: string[];
+};
+type Voucher = {
+  _id: string;
+  genre: string[];
+  discountPercentage: number;
+  isUsed: boolean;
+  expirationDate: string;
+  termsAndConditions: string;
 };
 
+
 type obj = {
-  user: User
-}
+  user: User;
+};
+type obj1 = {
+  vouchers: Voucher[];
+};
 type Ticket = {
   _id: string;
   movieName: string;
@@ -31,47 +43,54 @@ type Ticket = {
   status: string;
 };
 
-
 const AccountPage: React.FC = () => {
   const [userData, setUserData] = useState<User | null>(null);
   const [ticketData, setTicketData] = useState<Ticket[] | null>(null);
-
+  const [voucherData, setVoucherData] = useState<Voucher[] | null>(null);
+  const [password, setPassword] = useState<string>("");
+  const [rePassword, setRePassword] = useState<string>("");
+  const [changePass, setChangePass] = useState<boolean>(false);
   const getToken = () => {
     const cookieValue: any = Cookies.get("authInfo");
     const cookie = JSON.parse(cookieValue);
     return cookie.accessToken;
-  }
+  };
 
   const submitForm = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const token = getToken();
-    const authInfoCookie: any = Cookies.get("authInfo");
-    const authInfo = JSON.parse(authInfoCookie);
-    const userId = authInfo.userId;
+    if (password == rePassword) {
+          const token = getToken();
+          const authInfoCookie: any = Cookies.get("authInfo");
+          const authInfo = JSON.parse(authInfoCookie);
+          const userId = authInfo.userId;
 
-    const response = await fetch(`http://localhost:8080/user/${userId}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        username: userData?.username,
-        email: userData?.email,
-        fullName: userData?.fullName,
-        dateOfBirth: userData?.dateOfBirth,
-        gender: userData?.gender,
-        phoneNumber: userData?.phoneNumber,
-        address: userData?.address,
-        password: userData?.password,
-      }),
-    });
-    const data = await response.json();
-    toast.success("Đổi thông tin thành công");
-    setTimeout(() => {
-      window.location.reload(); 
-    }, 2000); 
-  }
+          const response = await fetch(`http://localhost:8080/user/${userId}`, {
+            method: "PUT",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              username: userData?.username,
+              email: userData?.email,
+              fullName: userData?.fullName,
+              dateOfBirth: userData?.dateOfBirth,
+              gender: userData?.gender,
+              phoneNumber: userData?.phoneNumber,
+              address: userData?.address,
+              password: userData?.password,
+            }),
+          });
+          const data = await response.json();
+          toast.success("Đổi thông tin thành công");
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+    } else {
+      toast.error("Mật khẩu chưa khớp");
+    }
+
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -85,6 +104,13 @@ const AccountPage: React.FC = () => {
           const response = await fetch(`http://localhost:8080/user/${userId}`);
           const data: obj = await response.json(); // Type the fetched data as obj
           const dataU: User = data.user;
+
+          const email: string = dataU.email
+          const response1 = await fetch(
+            `http://localhost:8080/voucher/getVoucherByEmail?email=${email}`
+          );
+          const data1: obj1 = await response1.json(); // Type the fetched data as obj
+          const listVoucher: Voucher[] = data1.vouchers;
           const bookingIds: string[] = dataU.bookings;
 
           // Fetch ticket data concurrently using Promise.all
@@ -96,6 +122,7 @@ const AccountPage: React.FC = () => {
 
           const tickets = await Promise.all(ticketPromises);
           setUserData(dataU);
+          setVoucherData(listVoucher)
           setTicketData(tickets);
         }
       } catch (error) {
@@ -106,8 +133,12 @@ const AccountPage: React.FC = () => {
     fetchUserData();
   }, []);
 
-  if (!userData||!ticketData) {
-    return <div className="h-[400px] flex justify-center items-center text-2xl font-bold">Loading...</div>;
+  if (!userData || !ticketData) {
+    return (
+      <div className="h-[400px] flex justify-center items-center text-2xl font-bold">
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -124,7 +155,7 @@ const AccountPage: React.FC = () => {
               />
               <div>
                 <h2 className="pb-[10px] text-lg font-bold text-[#72be43]">
-                  {userData.fullName}
+                  {userData.username}
                 </h2>
                 <ul className="pb-[8px]">
                   <li className="inline mr-5">
@@ -162,14 +193,13 @@ const AccountPage: React.FC = () => {
               >
                 <div className="w-full">
                   <label htmlFor="fullName" className="block pb-[10px]">
-                    Họ tên<span>*</span>
+                    Họ tên<span></span>
                   </label>
                   <input
                     type="text"
                     name="fullName"
                     className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
                     value={userData.fullName}
-                    readOnly
                     onChange={(events) =>
                       setUserData({
                         ...userData,
@@ -187,6 +217,7 @@ const AccountPage: React.FC = () => {
                     name="email"
                     className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
                     value={userData.email}
+                    readOnly
                     onChange={(events) =>
                       setUserData({
                         ...userData,
@@ -196,26 +227,65 @@ const AccountPage: React.FC = () => {
                   />
                 </div>
                 <div className="w-full">
-                  <label htmlFor="pass" className="block pb-[10px]">
-                    Mật khẩu <span>*</span>
+                  <label htmlFor="pass2" className="block pb-[10px]">
+                    Mật khẩu<span>*</span>
                   </label>
-                  <input
-                    type="password"
-                    name="password"
-                    className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
-                    value={userData.password}
-                    onChange={(events) =>
-                      setUserData({
-                        ...userData,
-                        [events.target.name]: events.target.value,
-                      })
-                    }
-                  />
+                  <div className="flex justify-between">
+                    <input
+                      type="password"
+                      name="password2"
+                      readOnly
+                      className="rounded bg-transparent border-[#454d6a] border block px-3 w-[63%] h-[38px]"
+                      value={"12345678910"}
+                    />
+                    <a
+                      onClick={() => setChangePass(!changePass)}
+                      className="block w-1/3 bg-[#72be43] text-center rounded h-[38px] leading-[38px] text-base font-bold cursor-pointer"
+                    >
+                      ĐỔI MẬT KHẨU
+                    </a>
+                  </div>
                 </div>
+                {changePass == true && (
+                  <>
+                    <div className="w-full">
+                      <label htmlFor="pass" className="block pb-[10px]">
+                        Mật khẩu mới<span>*</span>
+                      </label>
+                      <input
+                        type="password"
+                        name="password"
+                        className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
+                        value={password}
+                        onChange={(events) => {
+                          setUserData({
+                            ...userData,
+                            [events.target.name]: events.target.value,
+                          });
+
+                          setPassword(events.target.value);
+                        }}
+                      />
+                    </div>
+                    <div className="w-full">
+                      <label htmlFor="pass1" className="block pb-[10px]">
+                        Nhập lại Mật khẩu <span>*</span>
+                      </label>
+                      <input
+                        type="password"
+                        name="password1"
+                        className="rounded bg-transparent border-[#454d6a] border inline-block px-3 w-full h-[38px]"
+                        onChange={(events) =>
+                          setRePassword(events.target.value)
+                        }
+                      />
+                    </div>
+                  </>
+                )}
 
                 <div className="w-full ">
                   <label htmlFor="phone" className="block pb-[10px]">
-                    Số điện thoại <span>*</span>
+                    Số điện thoại <span></span>
                   </label>
                   <input
                     type="text"
@@ -302,16 +372,82 @@ const AccountPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex justify-between py-5 px-[20px]">
+      <div className="flex py-5 px-[20px]">
+        <h1 className="text-2xl font-bold">Danh sách voucher</h1>
+      </div>
+      <div className="w-full overflow-x-auto px-[20px] pb-[20px]">
+        <table className="w-full text-left  border border-collapse border-gray-400 rounded sm:border-separate ">
+          <tbody className="">
+            <tr>
+              <th
+                scope="col"
+                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
+              >
+                Mã voucher
+              </th>
+              <th
+                scope="col"
+                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
+              >
+                Thể loại
+              </th>
+
+              <th
+                scope="col"
+                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
+              >
+                Giảm giá
+              </th>
+              <th
+                scope="col"
+                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
+              >
+                Trạng thái
+              </th>
+              <th
+                scope="col"
+                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
+              >
+                Ngày hết hạn
+              </th>
+              <th
+                scope="col"
+                className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-[#272b3d]"
+              >
+                Điều khoản
+              </th>
+            </tr>
+            {voucherData?.map((voucher, index) => (
+              <tr key={index}>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {voucher._id}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {voucher.genre}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {voucher.discountPercentage}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {voucher.isUsed?"Đã dùng":"Chưa dùng"}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {voucher.expirationDate}
+                </td>
+                <td className="h-12 px-6 text-sm font-medium border-l first:border-l-0 text-white-700 bg-transparent">
+                  {voucher.termsAndConditions}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {voucherData?.length == 0 && (
+          <div className="text-center pt-2 text-xl">Trống</div>
+        )}
+      </div>
+
+      <div className="flex py-5 px-[20px]">
         <h1 className="text-2xl font-bold">Lịch sử giao dịch</h1>
-        <div className="flex">
-          <input
-            className="bg-white border px-2 rounded-md text-white border-gray-500"
-            type="month"
-            name=""
-            id=""
-          />
-        </div>
       </div>
       <div className="w-full overflow-x-auto px-[20px] pb-[20px]">
         <table className="w-full text-left  border border-collapse border-gray-400 rounded sm:border-separate ">
@@ -379,6 +515,9 @@ const AccountPage: React.FC = () => {
             ))}
           </tbody>
         </table>
+        {ticketData?.length == 0 && (
+          <div className="text-center pt-2 text-xl">Trống</div>
+        )}
       </div>
     </div>
   );
