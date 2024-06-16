@@ -54,6 +54,14 @@ export default function CheckOutBox() {
     return result;
   };
 
+  const goToCheckOut = () => {
+    if (bookingParams.seatArr.length > 0) {
+      router.push("/booking/check-out");
+    } else {
+      message.error("Vui lòng chọn ghế");
+    }
+  }
+
   const checkOut = async () => {
     setIsLoading(true);
     const res1 = await updateSeat();
@@ -140,7 +148,7 @@ export default function CheckOutBox() {
       </div>
       {path === "/booking/select-seat" && (
         <Button
-          onClick={() => router.push("/booking/check-out")}
+          onClick={() => goToCheckOut()}
           className="!bg-primary3 w-full"
           type="primary"
         >
